@@ -3,10 +3,12 @@ package com.example.rh.services;
 import java.util.List;
 
 import com.example.rh.entities.User;
+import com.example.rh.payload.request.SignupRequest;
+import org.springframework.http.ResponseEntity;
 
 public interface IUserService {
-	//public boolean effectuerPostulation(Long id );
+	public ResponseEntity<?> addUser(SignupRequest signupRequest);
+	public User updateUser(SignupRequest personnel,Long id);
 	public List<User> getUsers();
-	//public List<OffreEmploi> getPostulation(Long id) ;
-	public void supprimerUser(Long id);
+
 }
