@@ -36,8 +36,21 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
             AuthenticationException {
         com.example.rh.entities.User appUser = new com.example.rh.entities.User();
-        appUser.setUsername(request.getParameter("username"));
-        appUser.setPassword(request.getParameter("password"));
+        
+        ObjectMapper mapper = new ObjectMapper();
+        LoginRequest login;
+		try {
+			login = mapper.readValue(request.getInputStream(),LoginRequest.class);
+
+	        System.out.println(login.getPassword());
+		
+        appUser.setUsername(login.getUsername());
+        appUser.setPassword(login.getPassword());
+    }
+        catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(appUser.getUsername(), appUser.getPassword())
         );
@@ -51,7 +64,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String jwtAccessToken= JWT
                 .create()
                 .withSubject(authenticatedUser.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis()+5*60*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis()+30*60*1000))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles",authenticatedUser.getAuthorities().stream().map((a)->a.getAuthority()).collect(Collectors.toList()))
                 .sign(algorithm);

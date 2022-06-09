@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.example.rh.services.IUserService;
+
+import lombok.Data;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +34,6 @@ import com.example.rh.security.services.UserDetailsImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/auth/admin")
 public class AuthController {
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -50,14 +52,45 @@ public class AuthController {
 
 	@PostMapping("/addUser")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		return userService.addUser(signUpRequest);
+	public void registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+		System.out.println(signUpRequest.getEmail()+signUpRequest.getRole());
+		 userService.addUser(signUpRequest);
 	}
 
+	@PostMapping("/addRole")
+	@PreAuthorize("hasRole('ADMIN')")
+	public Role addRole(@RequestBody role r) {
+		
+		ERole e= ERole.ROLE_USER;
+		if(r.name.compareTo("admin")==0)
+		{
+			e=ERole.ROLE_ADMIN;
+			
+		}
+		
+		Role rr =new Role();
+		rr.setId(null);
+		rr.setName(e);
+		
+		
+	return roleRepository.save(rr);
+
+	}
 	@PutMapping("/user/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public User updateUser(@RequestBody SignupRequest personnel, @PathVariable Long id) {
 		return userService.updateUser(personnel, id);
+	
 
 	}
+}
+
+
+@Data
+class role
+{
+	
+	
+	String name;
+	
 }
