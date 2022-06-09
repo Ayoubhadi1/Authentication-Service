@@ -1,5 +1,6 @@
 package com.example.rh.controllers;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +32,6 @@ import com.example.rh.security.services.UserDetailsImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/auth/admin")
 public class AuthController {
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -59,5 +59,14 @@ public class AuthController {
 	public User updateUser(@RequestBody SignupRequest personnel, @PathVariable Long id) {
 		return userService.updateUser(personnel, id);
 
+	}
+
+	@PostMapping("allUsers")
+	public List<User> allUsers(@RequestBody List<Long> ids) {
+		List<User> l = new ArrayList<>();
+		ids.forEach(id -> {
+			l.add(userRepository.findById(id).get());
+		});
+		return l;
 	}
 }
