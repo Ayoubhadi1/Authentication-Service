@@ -7,8 +7,9 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 import com.example.rh.entities.User;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
-
+@CrossOrigin(origins = "http://localhost:4200")
 @RepositoryRestResource
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

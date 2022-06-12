@@ -2,13 +2,19 @@ package com.example.rh.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.rh.model.UserModel;
 import com.example.rh.payload.request.LoginRequest;
+import com.example.rh.repository.UserRepository;
+import com.example.rh.security.services.UserDetailsServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -27,6 +33,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private AuthenticationManager authenticationManager;
     private String jsonUsername;
     private String jsonPassword;
+    @Autowired
+    private UserRepository userRepository;
+
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -77,6 +86,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         Map<String,String> accessToken=new HashMap<>();
         accessToken.put("Access_Token",jwtAccessToken);
         accessToken.put("Refresh_Token",jwtRefreshToken);
+        accessToken.put("user",userRepository.findByUsername(authenticatedUser.getUsername()).get().toString());
         response.setContentType("application/json");
         new JsonMapper().writeValue(response.getOutputStream(),accessToken);
     }

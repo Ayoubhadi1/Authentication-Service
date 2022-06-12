@@ -1,13 +1,15 @@
 package com.example.rh.controllers;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.example.rh.services.IUserService;
 
 import lombok.Data;
@@ -33,7 +35,7 @@ import com.example.rh.repository.RoleRepository;
 import com.example.rh.repository.UserRepository;
 import com.example.rh.security.services.UserDetailsImpl;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @RestController
 public class AuthController {
 	@Autowired
@@ -50,6 +52,45 @@ public class AuthController {
 
 	@Autowired
 	IUserService userService;
+
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PostMapping("/elogin")
+	public ResponseEntity<?> authToken(@Valid @RequestBody LoginRequest loginRequest , HttpServletRequest request) throws IOException {
+		Authentication authentication = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		org.springframework.security.core.userdetails.User authenticatedUser= (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+		Algorithm algorithm=Algorithm.HMAC256("myHMACPrivateKey");
+		String jwtAccessToken= JWT
+				.create()
+				.withSubject(authenticatedUser.getUsername())
+				.withExpiresAt(new Date(System.currentTimeMillis()+30*60*1000))
+				.withIssuer(request.getRequestURL().toString())
+				.withClaim("roles",authenticatedUser.getAuthorities().stream().map((a)->a.getAuthority()).collect(Collectors.toList()))
+				.sign(algorithm);
+		String jwtRefreshToken= JWT
+				.create()
+				.withSubject(authenticatedUser.getUsername())
+				.withExpiresAt(new Date(System.currentTimeMillis()+60*24*3600*1000))
+				.withIssuer(request.getRequestURL().toString())
+				.sign(algorithm);
+
+		User u = userRepository.findByUsername(authenticatedUser.getUsername()).get();
+		List<String> roles = new ArrayList<>();
+				u.getRoles().forEach(role -> {
+				roles.add(role.getName().name());
+		});
+
+		return ResponseEntity.ok(new JwtResponse(u.getId(),
+				u.getUsername(),
+				u.getEmail(),
+				roles,
+				jwtAccessToken,
+				jwtRefreshToken
+				));
+
+	}
+
 
 	@PostMapping("/addUser")
 	@PreAuthorize("hasRole('ADMIN')")
