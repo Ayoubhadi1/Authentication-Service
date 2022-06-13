@@ -122,17 +122,27 @@ public class AuthController {
 	@PreAuthorize("hasRole('ADMIN')")
 	public User updateUser(@RequestBody SignupRequest personnel, @PathVariable Long id) {
 		return userService.updateUser(personnel, id);
-	
+
+	}
+	@GetMapping("/user/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public User getOneUser(@PathVariable Long id) {
+		return userRepository.findById(id).get();
 
 	}
 
-	@PostMapping("allUsers")
-	public List<User> allUsers(@RequestBody List<Long> ids) {
+	@PostMapping("allUsersById")
+	public List<User> allUsersByListOfId(@RequestBody List<Long> ids) {
 		List<User> l = new ArrayList<>();
 		ids.forEach(id -> {
 			l.add(userRepository.findById(id).get());
 		});
 		return l;
+	}
+
+	@GetMapping("allusers")
+	public List<User> allUsers(){
+		return userRepository.findAll();
 	}
 }
 
