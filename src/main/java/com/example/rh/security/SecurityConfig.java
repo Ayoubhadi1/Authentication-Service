@@ -47,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		final CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOriginPatterns(ImmutableList.of("*"));
+		configuration.setAllowedOriginPatterns(ImmutableList.of("http://localhost:4200"));
 		configuration.setAllowedMethods(ImmutableList.of("HEAD",
 				"GET", "POST", "PUT", "DELETE", "PATCH"));
 		// setAllowCredentials(true) is important, otherwise:
@@ -65,13 +65,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.cors().and().csrf().disable()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				.authorizeRequests().antMatchers("/users/**","/allusers").hasRole("ADMIN").and()
-				.authorizeRequests().antMatchers("/login","/allUsersById","/elogin").permitAll()
+				.authorizeRequests().antMatchers("/login","/allUsersById","/elogin","/userauthenticated/**").permitAll()
 				.anyRequest().authenticated();
 		http.headers().frameOptions().disable();
 		//http.authorizeRequests().anyRequest().authenticated();
 		http.addFilter(new JWTAuthenticationFilter(authenticationManagerBean()));
 		http.addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
+
 	@Override
 	@Bean
 	public AuthenticationManager authenticationManagerBean() throws Exception { return super.authenticationManagerBean();}

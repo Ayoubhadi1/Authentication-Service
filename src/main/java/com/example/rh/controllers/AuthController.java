@@ -144,6 +144,12 @@ public class AuthController {
 	public List<User> allUsers(){
 		return userRepository.findAll();
 	}
+
+	@GetMapping("/userauthenticated/{u}")
+	public User getAuthenticatedUserFromUsername(@PathVariable String u){
+		return userRepository.findByUsername(u).get();
+	}
+
 }
 
 
