@@ -64,14 +64,14 @@ public class AuthController {
 		String jwtAccessToken= JWT
 				.create()
 				.withSubject(authenticatedUser.getUsername())
-				.withExpiresAt(new Date(System.currentTimeMillis()+30*60*1000))
+				.withExpiresAt(new Date(System.currentTimeMillis()+240*60*1000))
 				.withIssuer(request.getRequestURL().toString())
 				.withClaim("roles",authenticatedUser.getAuthorities().stream().map((a)->a.getAuthority()).collect(Collectors.toList()))
 				.sign(algorithm);
 		String jwtRefreshToken= JWT
 				.create()
 				.withSubject(authenticatedUser.getUsername())
-				.withExpiresAt(new Date(System.currentTimeMillis()+60*24*3600*1000))
+				.withExpiresAt(new Date(System.currentTimeMillis()+120*24*3600*1000))
 				.withIssuer(request.getRequestURL().toString())
 				.sign(algorithm);
 
